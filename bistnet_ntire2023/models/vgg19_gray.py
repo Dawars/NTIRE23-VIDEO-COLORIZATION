@@ -1,4 +1,5 @@
 from functools import reduce
+from pathlib import Path
 
 import torch
 import torch.nn as nn
@@ -78,67 +79,68 @@ layer_names = [
     "fc8",
 ]
 
-model = nn.Sequential(  # Sequential,
-    nn.Conv2d(3, 64, (3, 3), (1, 1), (1, 1)),
-    nn.ReLU(),
-    nn.Conv2d(64, 64, (3, 3), (1, 1), (1, 1)),
-    nn.ReLU(),
-    nn.MaxPool2d((2, 2), (2, 2), (0, 0), ceil_mode=True),
-    nn.Conv2d(64, 128, (3, 3), (1, 1), (1, 1)),
-    nn.ReLU(),
-    nn.Conv2d(128, 128, (3, 3), (1, 1), (1, 1)),
-    nn.ReLU(),
-    nn.MaxPool2d((2, 2), (2, 2), (0, 0), ceil_mode=True),
-    nn.Conv2d(128, 256, (3, 3), (1, 1), (1, 1)),
-    nn.ReLU(),
-    nn.Conv2d(256, 256, (3, 3), (1, 1), (1, 1)),
-    nn.ReLU(),
-    nn.Conv2d(256, 256, (3, 3), (1, 1), (1, 1)),
-    nn.ReLU(),
-    nn.Conv2d(256, 256, (3, 3), (1, 1), (1, 1)),
-    nn.ReLU(),
-    nn.MaxPool2d((2, 2), (2, 2), (0, 0), ceil_mode=True),
-    nn.Conv2d(256, 512, (3, 3), (1, 1), (1, 1)),
-    nn.ReLU(),
-    nn.Conv2d(512, 512, (3, 3), (1, 1), (1, 1)),
-    nn.ReLU(),
-    nn.Conv2d(512, 512, (3, 3), (1, 1), (1, 1)),
-    nn.ReLU(),
-    nn.Conv2d(512, 512, (3, 3), (1, 1), (1, 1)),
-    nn.ReLU(),
-    nn.MaxPool2d((2, 2), (2, 2), (0, 0), ceil_mode=True),
-    nn.Conv2d(512, 512, (3, 3), (1, 1), (1, 1)),
-    nn.ReLU(),
-    nn.Conv2d(512, 512, (3, 3), (1, 1), (1, 1)),
-    nn.ReLU(),
-    nn.Conv2d(512, 512, (3, 3), (1, 1), (1, 1)),
-    nn.ReLU(),
-    nn.Conv2d(512, 512, (3, 3), (1, 1), (1, 1)),
-    nn.ReLU(),
-    nn.MaxPool2d((2, 2), (2, 2), (0, 0), ceil_mode=True),
-    Lambda(lambda x: x.view(x.size(0), -1)),  # View,
-    nn.Sequential(Lambda(lambda x: x.view(1, -1) if 1 == len(x.size()) else x), nn.Linear(25088, 4096)),  # Linear,
-    nn.ReLU(),
-    nn.Sequential(Lambda(lambda x: x.view(1, -1) if 1 == len(x.size()) else x), nn.Linear(4096, 4096)),  # Linear,
-    nn.ReLU(),
-    nn.Sequential(Lambda(lambda x: x.view(1, -1) if 1 == len(x.size()) else x), nn.Linear(4096, 1000)),  # Linear,
-)
 
+class vgg19_gray_net(nn.Module):
+    model = nn.Sequential(  # Sequential,
+        nn.Conv2d(3, 64, (3, 3), (1, 1), (1, 1)),
+        nn.ReLU(),
+        nn.Conv2d(64, 64, (3, 3), (1, 1), (1, 1)),
+        nn.ReLU(),
+        nn.MaxPool2d((2, 2), (2, 2), (0, 0), ceil_mode=True),
+        nn.Conv2d(64, 128, (3, 3), (1, 1), (1, 1)),
+        nn.ReLU(),
+        nn.Conv2d(128, 128, (3, 3), (1, 1), (1, 1)),
+        nn.ReLU(),
+        nn.MaxPool2d((2, 2), (2, 2), (0, 0), ceil_mode=True),
+        nn.Conv2d(128, 256, (3, 3), (1, 1), (1, 1)),
+        nn.ReLU(),
+        nn.Conv2d(256, 256, (3, 3), (1, 1), (1, 1)),
+        nn.ReLU(),
+        nn.Conv2d(256, 256, (3, 3), (1, 1), (1, 1)),
+        nn.ReLU(),
+        nn.Conv2d(256, 256, (3, 3), (1, 1), (1, 1)),
+        nn.ReLU(),
+        nn.MaxPool2d((2, 2), (2, 2), (0, 0), ceil_mode=True),
+        nn.Conv2d(256, 512, (3, 3), (1, 1), (1, 1)),
+        nn.ReLU(),
+        nn.Conv2d(512, 512, (3, 3), (1, 1), (1, 1)),
+        nn.ReLU(),
+        nn.Conv2d(512, 512, (3, 3), (1, 1), (1, 1)),
+        nn.ReLU(),
+        nn.Conv2d(512, 512, (3, 3), (1, 1), (1, 1)),
+        nn.ReLU(),
+        nn.MaxPool2d((2, 2), (2, 2), (0, 0), ceil_mode=True),
+        nn.Conv2d(512, 512, (3, 3), (1, 1), (1, 1)),
+        nn.ReLU(),
+        nn.Conv2d(512, 512, (3, 3), (1, 1), (1, 1)),
+        nn.ReLU(),
+        nn.Conv2d(512, 512, (3, 3), (1, 1), (1, 1)),
+        nn.ReLU(),
+        nn.Conv2d(512, 512, (3, 3), (1, 1), (1, 1)),
+        nn.ReLU(),
+        nn.MaxPool2d((2, 2), (2, 2), (0, 0), ceil_mode=True),
+        Lambda(lambda x: x.view(x.size(0), -1)),  # View,
+        nn.Sequential(Lambda(lambda x: x.view(1, -1) if 1 == len(x.size()) else x), nn.Linear(25088, 4096)),  # Linear,
+        nn.ReLU(),
+        nn.Sequential(Lambda(lambda x: x.view(1, -1) if 1 == len(x.size()) else x), nn.Linear(4096, 4096)),  # Linear,
+        nn.ReLU(),
+        nn.Sequential(Lambda(lambda x: x.view(1, -1) if 1 == len(x.size()) else x), nn.Linear(4096, 1000)),  # Linear,
+    )
 
-model.load_state_dict(torch.load("data/vgg19_gray.pth"))
-vgg19_gray_net = torch.nn.Sequential()
-for (name, layer) in model._modules.items():
-    vgg19_gray_net.add_module(layer_names[int(name)], model[int(name)])
+    def __init__(self, checkpoint_path: Path):
+        super().__init__()
+        self.model.load_state_dict(torch.load(checkpoint_path))
+        vgg19_gray_net = torch.nn.Sequential()
+        for (name, layer) in self.model._modules.items():
+            vgg19_gray_net.add_module(layer_names[int(name)], self.model[int(name)])
 
-for param in vgg19_gray_net.parameters():
-    param.requires_grad = False
-vgg19_gray_net.eval()
+        self.add_module(vgg19_gray_net)
 
 
 class vgg19_gray(torch.nn.Module):
-    def __init__(self, requires_grad=False):
+    def __init__(self, requires_grad=False, checkpoint_path: Path = Path("data/vgg19_gray.pth")):
         super(vgg19_gray, self).__init__()
-        vgg_pretrained_features = vgg19_gray_net
+        vgg_pretrained_features = vgg19_gray_net(checkpoint_path).modules()[0]
         self.slice1 = torch.nn.Sequential()
         self.slice2 = torch.nn.Sequential()
         self.slice3 = torch.nn.Sequential()
@@ -163,9 +165,9 @@ class vgg19_gray(torch.nn.Module):
 
 
 class vgg19_gray_new(torch.nn.Module):
-    def __init__(self, requires_grad=False):
+    def __init__(self, requires_grad=False, checkpoint_path: Path = Path("data/vgg19_gray.pth")):
         super(vgg19_gray_new, self).__init__()
-        vgg_pretrained_features = vgg19_gray_net
+        vgg_pretrained_features = vgg19_gray_net(checkpoint_path).modules()[0]
         self.slice0 = torch.nn.Sequential()
         self.slice1 = torch.nn.Sequential()
         self.slice2 = torch.nn.Sequential()
